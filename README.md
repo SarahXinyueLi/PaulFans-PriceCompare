@@ -1,7 +1,7 @@
 # PaulFans-PriceCompare
-Group Name: PaulFans
-
 https://docs.google.com/document/d/18z6eaY8qy6jQ2RiHLE2rYUx01dZ3vLVumd1vl-QqcHs/edit?ts=5bb646e9
+
+Group Name: PaulFans
 
 Group Members: Wenshan Liang (wl2676), Dawei Zhang (dz2386), Xinyue Li (xl2804), Zixuan Li (zl2713)
 
