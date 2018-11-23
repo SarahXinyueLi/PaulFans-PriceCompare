@@ -53,7 +53,7 @@ from bs4 import BeautifulSoup
 
 # # Keywords preparation
 
-# In[9]:
+# In[20]:
 
 
 # seperate keywords
@@ -61,37 +61,113 @@ from bs4 import BeautifulSoup
 # connect with %20
 
 keywords = 'Apple%20iPhone%207%2032GB%20Unlocked%2C%20Black%20US%20Version'
+search_url = 'https://www.walmart.com/search/?query=' + keywords
 
 
 # # Web Scraping - Walmart
 
-# In[10]:
+# In[22]:
 
 
-url = 'https://www.walmart.com/search/?query=' + keywords
-
-response = requests.get(url) 
-if response.status_code == 200:
-    print("Success")
-    results_page = BeautifulSoup(response.content,'lxml')
-else:
-    print("Failure")
-
-
-# In[11]:
+def get_web_scrap_result(url):
+    response = requests.get(url) 
+    if response.status_code == 200:
+        print("Success")
+        results_page = BeautifulSoup(response.content,'lxml')
+    else:
+        print("Failure")
+    return results_page
 
 
+# In[23]:
+
+
+results_page = get_web_scrap_result(search_url)
 print(results_page.prettify())
 
 
 # ### only consider the first link as the target similar product for now
 
-# In[18]:
+# In[24]:
 
 
-products_list = results_page.find_all('div',class_ = 'search-result-product-title listview')[0]
-product_link = products_list.find('a').get('href')
-product_link_full = 'https://www.walmart.com' + product_link
-#product-title-link line-clamp line-clamp-2
+def get_top_product_info(results_page):
+    products_list = results_page.find_all('div',class_ = 'search-result-product-title listview')[0]
+    product_link = products_list.find('a').get('href')
+    product_link_full = 'https://www.walmart.com' + product_link
+    return product_link_full
+
+
+# In[25]:
+
+
+product_link_full = get_top_product_info(results_page)
 product_link_full
+
+
+# In[39]:
+
+
+def get_product_price(product_link_full):
+    product_result_page = get_web_scrap_result(product_link_full)
+    # get price
+    try:
+        price = product_result_page.find('span',class_ = "price-characteristic").get('content')
+    except:
+        print('Cannot find price tag')
+    # get rating
+    overall_rating = product_result_page.find('span',class_ = "ReviewsHeader-rating").get_text()
+    overall_rating = float(overall_rating[:3])
+        
+    return ?????
+
+
+# In[30]:
+
+
+product_result_page = get_product_price(product_link_full)
+
+
+# In[42]:
+
+
+overall_rating = product_result_page.find('span',class_ = "ReviewsHeader-rating").get_text()
+overall_rating = float(overall_rating[:3])
+
+
+# In[88]:
+
+
+def get_review(product_result_page):
+    reviews_list = product_result_page.find_all('div',class_ = "review")
+    review_title_list = list()
+    review_content_list = list()
+    for review in reviews_list:
+        # get review title
+        try:
+            review_title = review.find('div',class_="review-title").get_text()
+        except:
+            review_title = ''
+        review_title_list.append(review_title)
+        
+        # get review content
+        try:
+            review.find('div',class_='collapsable-content-container').get_text()
+            review_content_list.append(review.find('div',class_='collapsable-content-container').get_text())
+        except:
+            review_content_list.append('')
+
+    return review_title_list,review_content_list
+
+
+# In[89]:
+
+
+review_title_list,review_content_list = get_review(product_result_page)
+
+
+# In[74]:
+
+
+reviews_list[0]
 
