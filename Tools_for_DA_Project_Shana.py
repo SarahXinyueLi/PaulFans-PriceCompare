@@ -42,13 +42,15 @@
 
 # # Imports
 
-# In[1]:
+# In[150]:
 
 
 import numpy as np
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+import re
+import datetime
 
 
 # # Keywords preparation
@@ -82,92 +84,119 @@ def get_web_scrap_result(url):
 # In[23]:
 
 
+# test
 results_page = get_web_scrap_result(search_url)
 print(results_page.prettify())
 
 
 # ### only consider the first link as the target similar product for now
 
-# In[24]:
+# In[138]:
 
 
-def get_top_product_info(results_page):
+def get_top_products_info(results_page):
     products_list = results_page.find_all('div',class_ = 'search-result-product-title listview')[0]
     product_link = products_list.find('a').get('href')
     product_link_full = 'https://www.walmart.com' + product_link
     return product_link_full
 
 
-# In[25]:
+# In[139]:
 
 
-product_link_full = get_top_product_info(results_page)
+# test
+product_link_full = get_top_products_info(results_page)
 product_link_full
 
 
-# In[39]:
+# In[143]:
 
 
-def get_product_price(product_link_full):
+def get_product_info(product_link_full):
     product_result_page = get_web_scrap_result(product_link_full)
+    
+    # get product title
+    title = product_result_page.find('div',class_ = 'ProductTitle').get_text()
+    
     # get price
     try:
         price = product_result_page.find('span',class_ = "price-characteristic").get('content')
     except:
         print('Cannot find price tag')
-    # get rating
-    overall_rating = product_result_page.find('span',class_ = "ReviewsHeader-rating").get_text()
-    overall_rating = float(overall_rating[:3])
+        price = None
         
-    return ?????
+    # get rating
+    try:
+        overall_rating = product_result_page.find('span',class_ = "ReviewsHeader-rating").get_text()
+        overall_rating = float(overall_rating[:3])
+    except:
+        overall_rating = None
+    
+    # get review
+    review_summary = get_review(product_result_page)
+    
+    return title,price,overall_rating,review_summary
 
-
-# In[30]:
-
-
-product_result_page = get_product_price(product_link_full)
-
-
-# In[42]:
-
-
-overall_rating = product_result_page.find('span',class_ = "ReviewsHeader-rating").get_text()
-overall_rating = float(overall_rating[:3])
-
-
-# In[88]:
 
 
 def get_review(product_result_page):
-    reviews_list = product_result_page.find_all('div',class_ = "review")
-    review_title_list = list()
-    review_content_list = list()
-    for review in reviews_list:
-        # get review title
-        try:
-            review_title = review.find('div',class_="review-title").get_text()
-        except:
-            review_title = ''
-        review_title_list.append(review_title)
+    if product_result_page.find('button',class_ = 'button Reviews-seeAllButton button--primary') != None:
+        # get product id & review url
+        pattern = r'(?P<product_id>\d{9})'
+        string = product_link_full
+        product_id = re.search(pattern,string).group('product_id')
+        review_url = 'https://www.walmart.com/reviews/product/' + product_id
+        # get review page link
+        review_result_page = get_web_scrap_result(review_url)
         
-        # get review content
-        try:
-            review.find('div',class_='collapsable-content-container').get_text()
-            review_content_list.append(review.find('div',class_='collapsable-content-container').get_text())
-        except:
-            review_content_list.append('')
+        # get all reviews
+        reviews_list = review_result_page.find_all('div',class_ = 'Grid ReviewList-content')
+        review_title_list = list()
+        review_content_list = list()
+        for review in reviews_list:
+            # get review title
+            try:
+                review_title = review.find('div',class_="review-title").get_text()
+            except:
+                review_title = ''
+            review_title_list.append(review_title)
+            # get review content
+            try:
+                review.find('div',class_='collapsable-content-container').get_text()
+                review_content_list.append(review.find('div',class_='collapsable-content-container').get_text())
+            except:
+                review_content_list.append('')
+            review_summary = list(zip(review_title_list,review_content_list))
+    else:
+        # return empty list if no review
+        review_summary = list()
+        
+    return review_summary
 
-    return review_title_list,review_content_list
+
+# In[146]:
 
 
-# In[89]:
+# test
+title,price,overall_rating,review_summary = get_product_info(product_link_full)
+print(title)
+print(price)
+print(overall_rating)
+print(review_summary)
 
 
-review_title_list,review_content_list = get_review(product_result_page)
+# # Summarized
+
+# In[147]:
 
 
-# In[74]:
-
-
-reviews_list[0]
+def all_in_one(url):
+    results_page = get_web_scrap_result(url)
+    product_link_full = get_top_products_info(results_page)
+    title,price,overall_rating,review_summary = get_product_info(product_link_full)
+    # save file
+    scraping_time = datetime.datetime.now()
+    date = str(scraping_time.date())
+    hour = str(scraping_time.hour)
+    file_name = date + '-' + hour + ':00' + '-Walmart'
 
