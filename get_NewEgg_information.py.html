@@ -1,0 +1,72 @@
+
+# coding: utf-8
+
+# In[2]:
+
+
+import requests
+from bs4 import BeautifulSoup
+
+#First, we enter the keywords for certain products
+
+def get_NewEgg():
+    initial_keywords= input("Please enter the keywords : ")
+    initial_keywords = initial_keywords.split()
+    initial_keywords = initial_keywords[:len(initial_keywords)//3]
+    keywords = " ".join(str(x) for x in initial_keywords)
+    
+    url = "https://www.newegg.com/Product/ProductList.aspx?Submit=ENE&DEPA=0&Order=BESTMATCH&Description=" + keywords + "&N=-1&isNodeId=1"
+    response = requests.get(url)
+
+    #We want the status code to be 200
+    if not response.status_code == 200:
+        print("Requests Failed")
+
+    try:
+        results_page = BeautifulSoup(response.content,'lxml')
+
+        if results_page.find_all('span',class_="result-message-error"):
+            print('We have found 0 items that match',keywords)
+
+        else:
+            new_url = results_page.find_all('a',class_="item-title")[0].get('href')
+            new_response = requests.get(new_url)
+
+            if not new_response.status_code == 200:
+                print("Requests Failed")
+
+            try:
+                new_results_page = BeautifulSoup(new_response.content,'lxml')
+                new_title = results_page.find_all('a',class_="item-title")[0].get_text().strip().split('\n')
+                new_price = results_page.find_all('li',class_="price-current")[0].get_text()
+                new_price = new_price.split('\xa0')[0].split('\n')[-1]
+
+                if new_results_page.find('a',class_="first_review"):
+                    number_of_product_rating = 'Be the first to review this product'
+                    new_rating = 'Be the first to review this product'
+
+                else:
+                    number_of_product_rating = new_results_page.find('span',itemprop="reviewCount").get_text()
+                    new_rating = new_results_page.find_all('span',class_="print")[0].get_text()
+                
+                Results = {'Product Title':new_title,
+                           'Product Current Price':new_price,
+                           'Comments':number_of_product_rating,
+                           'Rating':new_rating,
+                           'Product Link':new_url}
+
+                return Results
+
+            except:
+                print('We have no information')
+
+    except:
+        print('We have found 0 items that match',keywords)
+    
+
+
+# In[3]:
+
+
+get_NewEgg()
+
