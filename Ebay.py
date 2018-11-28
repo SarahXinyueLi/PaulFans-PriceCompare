@@ -60,7 +60,7 @@ for i in range(12):
         
         if products_list.find('span',class_='s-item__reviews-count'):
             num_text=products_list.find('span',class_='s-item__reviews-count').text
-            num = re.search(r'(\d)+',num_text).group(1)
+            num = re.search(r'(\d+)',num_text).group(1)
         else:
             num=''
         
