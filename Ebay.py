@@ -28,9 +28,10 @@ titlelist=['Toshiba 43LF621U19 43-inch 4K Ultra HD Smart LED TV HDR - Fire TV Ed
 
 data=[]
 
-for title in titlelist:
+for i in range(12):
     
     ## 从Amazon的商品名进入EBay搜索结果页
+    title=titlelist[i]
     stitle = title.replace(' ','+')
     url = 'https://www.ebay.com/sch/i.html?_from=R40&_nkw=' + stitle
     
@@ -43,7 +44,7 @@ for title in titlelist:
         
     ## 若没检索到商品，记录空字串    
     if results_page.find('h1',class_ = 'srp-controls__count-heading').string[0]=='0':
-        data.append(['','','','',''])
+        data.append([i+1,'','','','',''])
     else:
         ## 检索到商品，记录第一个商品信息
         products_list = results_page.find_all('li',class_ = 's-item')[0]
@@ -63,7 +64,7 @@ for title in titlelist:
         else:
             num=''
         
-        data.append([link,name,price,rate,num])
+        data.append([i+1,link,name,price,rate,num])
     
 ## 每次12*5存储进一张特别命名的csv表格
 timename = time.strftime("%Y%m%d_%H", time.localtime()) 
@@ -77,3 +78,6 @@ with open('Ebay_'+timename+'.csv','r') as fp:
     r=csv.reader(fp)
     d=list(r)
 ''' 
+
+
+
