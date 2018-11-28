@@ -7,11 +7,12 @@
 import requests
 from bs4 import BeautifulSoup
 
+
 #First, we enter the keywords for certain products
 
 def get_NewEgg(initial_keywords):
-    #initial_keywords= input("Please enter the keywords : ")
     initial_keywords = initial_keywords.split()
+    # we cut the keywords so that it can be better fit in NewEgg.com
     initial_keywords = initial_keywords[:len(initial_keywords)//3]
     keywords = " ".join(str(x) for x in initial_keywords)
     
@@ -53,11 +54,7 @@ def get_NewEgg(initial_keywords):
                 
                 Results = [new_title,new_price,number_of_product_rating,new_rating,new_url]
                 
-                #Results = {'Product Title':new_title,
-                           #'Product Current Price':new_price,
-                           #'Comments':number_of_product_rating,
-                           #'Rating':new_rating,
-                           #'Product Link':new_url}
+                
 
                 return Results
 
@@ -65,7 +62,7 @@ def get_NewEgg(initial_keywords):
                 return 'We have no information'
 
     except:
-        return 'Invalid'
+        return 'Invalid information'
     
 
 
