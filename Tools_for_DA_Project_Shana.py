@@ -42,7 +42,7 @@
 
 # # Imports
 
-# In[150]:
+# In[1]:
 
 
 import numpy as np
@@ -51,24 +51,59 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import datetime
+import csv
 
 
 # # Keywords preparation
 
-# In[20]:
+# In[51]:
 
 
-# seperate keywords
+amazon_title_list = ['Toshiba 43LF621U19 43-inch 4K Ultra HD Smart LED TV HDR - Fire TV Edition',
+                     'Samsung UN50NU7100 50" (UN50NU7100FXZA)',
+                    'TCL 55S405 55-Inch 4K Ultra HD Roku Smart LED TV (2017 Model)',
+                     'Samsung SM-N950UZKAXAA',
+                     'Nokia 3.1 - Android One (Oreo) - 16 GB - Dual SIM Unlocked Smartphone (AT&T/T-Mobile/MetroPCS/Cricket/H2O) - 5.2" Screen - Blue - U.S. Warranty',
+                    'Apple iPhone 7 32GB unlocked black',
+                     'Microsoft surface pro6 256GB',
+                     'Lenovo yoga 730 convertible',
+                     'Dell G5 Gaming Laptop 15.6" Full HD, Intel Core i7-8750H',
+                     'AVANTI RM4416B Refrigerator 4.4CF Cap Energy Star Compliant Black',
+                     'GE GFW480SSKWW 4.9 Cu. Ft. White Front Load Stackable With Steam Cycle Washer - Energy Star',
+                     'Panasonic Microwave Oven NN-SN651B Black Countertop with Inverter Technology and Genius Sensor, 1.2 Cu. Ft, 1200W'
+                    ]
 
-# connect with %20
 
-keywords = 'Apple%20iPhone%207%2032GB%20Unlocked%2C%20Black%20US%20Version'
-search_url = 'https://www.walmart.com/search/?query=' + keywords
+# In[2]:
+
+
+def get_amazon_url(amazon_title_list):
+    url_list = list()
+    # seperate keywords
+    for amazon_title in amazon_title_list:
+        amazon_title = amazon_title.replace('-',' ')
+        title_words = amazon_title.split(' ')
+        word_list = list()
+        for word in title_words:
+            word = word.strip()
+            if word.find('(') != -1:
+                word = word[:word.find('(')]
+            if word.find(')') != -1 or len(word)<1:
+                continue
+            word_list.append(word)
+
+        # connect with %20
+        keywords = '%20'.join(word_list)
+
+        #keywords = 'Apple%20iPhone%207%2032GB%20Unlocked%2C%20Black%20US%20Version'
+        search_url = 'https://www.walmart.com/search/?query=' + keywords
+        url_list.append(search_url)
+    return url_list
 
 
 # # Web Scraping - Walmart
 
-# In[22]:
+# In[3]:
 
 
 def get_web_scrap_result(url):
@@ -81,27 +116,33 @@ def get_web_scrap_result(url):
     return results_page
 
 
-# In[23]:
+# In[138]:
 
 
 # test
-results_page = get_web_scrap_result(search_url)
+results_page = get_web_scrap_result(url)
 print(results_page.prettify())
 
 
 # ### only consider the first link as the target similar product for now
 
-# In[138]:
+# In[4]:
 
 
 def get_top_products_info(results_page):
-    products_list = results_page.find_all('div',class_ = 'search-result-product-title listview')[0]
+    try:
+        products_list = results_page.find_all('div',class_ = 'search-result-product-title listview')[0]
+    except:
+        try:
+            products_list = results_page.find_all('div',class_ = 'search-result-product-title gridview')[0]
+        except:
+            print('CANNOT FIND TOP PRODUCT')
     product_link = products_list.find('a').get('href')
     product_link_full = 'https://www.walmart.com' + product_link
     return product_link_full
 
 
-# In[139]:
+# In[157]:
 
 
 # test
@@ -109,7 +150,7 @@ product_link_full = get_top_products_info(results_page)
 product_link_full
 
 
-# In[143]:
+# In[5]:
 
 
 def get_product_info(product_link_full):
@@ -130,24 +171,33 @@ def get_product_info(product_link_full):
         overall_rating = product_result_page.find('span',class_ = "ReviewsHeader-rating").get_text()
         overall_rating = float(overall_rating[:3])
     except:
-        overall_rating = None
+        try:
+            product_result_page = get_web_scrap_result(product_link_full)
+            overall_rating = float(product_result_page.find('span',class_ = "ReviewsHeader-ratingPrefix font-bold").get_text().strip())
+        except:
+            overall_rating = None
     
     # get review
-    review_summary = get_review(product_result_page)
+    review_num,review_summary = get_review(product_result_page,product_link_full)
     
-    return title,price,overall_rating,review_summary
+    return title,price,overall_rating,review_num,review_summary
 
 
 
-def get_review(product_result_page):
-    if product_result_page.find('button',class_ = 'button Reviews-seeAllButton button--primary') != None:
+def get_review(product_result_page,product_link_full):
+    try:
+    #if product_result_page.find('button',class_ = 'button Reviews-seeAllButton button--primary') != None:
         # get product id & review url
-        pattern = r'(?P<product_id>\d{9})'
+        pattern = r'(?P<product_id>\d{8}\d?)\b'
         string = product_link_full
         product_id = re.search(pattern,string).group('product_id')
         review_url = 'https://www.walmart.com/reviews/product/' + product_id
         # get review page link
         review_result_page = get_web_scrap_result(review_url)
+        
+        # get number of reviews
+        reviews_header = review_result_page.find('div',class_ = 'pagination-container')
+        review_num  = reviews_header.find_all('span')[-1].get_text().strip()
         
         # get all reviews
         reviews_list = review_result_page.find_all('div',class_ = 'Grid ReviewList-content')
@@ -167,36 +217,84 @@ def get_review(product_result_page):
             except:
                 review_content_list.append('')
             review_summary = list(zip(review_title_list,review_content_list))
-    else:
+    #else:
+    except:
         # return empty list if no review
+        review_num = None
         review_summary = list()
         
-    return review_summary
+    return review_num, review_summary
 
 
-# In[146]:
+# In[162]:
 
 
 # test
-title,price,overall_rating,review_summary = get_product_info(product_link_full)
+title,price,overall_rating,review_num,review_summary = get_product_info(product_link_full)
 print(title)
 print(price)
 print(overall_rating)
+print(review_num)
 print(review_summary)
 
 
 # # Summarized
 
-# In[147]:
+# In[7]:
 
 
-def all_in_one(url):
-    results_page = get_web_scrap_result(url)
-    product_link_full = get_top_products_info(results_page)
-    title,price,overall_rating,review_summary = get_product_info(product_link_full)
-    # save file
-    scraping_time = datetime.datetime.now()
-    date = str(scraping_time.date())
-    hour = str(scraping_time.hour)
-    file_name = date + '-' + hour + ':00' + '-Walmart'
+def all_in_one(amazon_title_list, output=True):
+    url_list = get_amazon_url(amazon_title_list)
+    index = 1
+    for url in url_list:
+        results_page = get_web_scrap_result(url)
+        product_link_full = get_top_products_info(results_page)
+        title,price,overall_rating,review_num,review_summary = get_product_info(product_link_full)
+        
+        # save file
+        scraping_time = datetime.datetime.now()
+        date = datetime.datetime.now().strftime('%Y%m%d')
+        hour = str(scraping_time.hour)
+        file_name = 'Walmart_' + date + '_' + hour + '.csv'
+        
+        # full result
+        result_list = [url,product_link_full,title,price,overall_rating,review_num,review_summary]
+        # result output for ui
+        result_list2 = [index,product_link_full,title,price,overall_rating,review_num]
+        index = index + 1
+        #all_df = pd.DataFrame([url,product_link_full,title,price,overall_rating,review_summary],columns=
+                              #['Search url','Walmart url','Title','Price','Rating','Review Summary'])
+        if output:
+            with open(file_name,'a') as fp:
+                writer = csv.writer(fp)
+                writer.writerow(result_list2)
+        else:
+             with open('test_result.csv','a') as fp:
+                writer = csv.writer(fp)
+                writer.writerow(result_list)
+
+
+# In[8]:
+
+
+amazon_title_list = ['Toshiba 43LF621U19 43-inch 4K Ultra HD Smart LED TV HDR - Fire TV Edition',
+                     'Samsung UN50NU7100 50" (UN50NU7100FXZA)',
+                    'TCL 55S405 55-Inch 4K Ultra HD Roku Smart LED TV (2017 Model)',
+                     'Samsung SM-N950UZKAXAA',
+                     'Nokia 3.1 - Android One (Oreo) - 16 GB - Dual SIM Unlocked Smartphone (AT&T/T-Mobile/MetroPCS/Cricket/H2O) - 5.2" Screen - Blue - U.S. Warranty',
+                    'Apple iPhone 7 32GB unlocked black',
+                     'Microsoft surface pro6 256GB',
+                     'Lenovo yoga 730 convertible',
+                     'Dell G5 Gaming Laptop 15.6" Full HD, Intel Core i7-8750H',
+                     'AVANTI RM4416B Refrigerator 4.4CF Cap Energy Star Compliant Black',
+                     'GE GFW480SSKWW 4.9 Cu. Ft. White Front Load Stackable With Steam Cycle Washer - Energy Star',
+                     'Panasonic Microwave Oven NN-SN651B Black Countertop with Inverter Technology and Genius Sensor, 1.2 Cu. Ft, 1200W'
+                    ]
+
+
+# In[9]:
+
+
+# final program to run
+all_in_one(amazon_title_list,output=True)
 
