@@ -1,11 +1,12 @@
 # PaulFans-PriceCompare
 https://docs.google.com/document/d/18z6eaY8qy6jQ2RiHLE2rYUx01dZ3vLVumd1vl-QqcHs/edit?ts=5bb646e9
 
+IEOR 4501 Sec-001 Project
 Group Name: PaulFans
 
-Group Members: Wenshan Liang (wl2676), Dawei Zhang (dz2386), Xinyue Li (xl2804), Zixuan Li (zl2713)
+Group Members: Xinyue Li (xl2804), Zixuan Li (zl2713)，Wenshan Liang (wl2676), Dawei Zhang (dz2386)
 
-Project Objective: To help customers purchase targeted products at a relatively low price by choosing the right time and right shopping website.
+Project Objective: We aim to create a UI for price comparison, so that customers are able to choose targeted products at a relatively low price at proper time and proper shopping website.
 
 Key Functions: 
 
