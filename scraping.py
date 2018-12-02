@@ -2,13 +2,13 @@
 """
 Created on Sat Dec  1 17:16:00 2018
 
-@author: Xinyue
+@author: PaulFans
 """
 
-#时间格式 t: 2018113019 
-#平台编号 plat: Amazon:1 Walmart:2 Ebay:3 NewEgg:4
-#产品编号 id: 1-12
-#输出csv: [t, plat, id, price,rate,num,name,link]
+# Scraping time: yyyymmddhh
+# Platform ID: Amazon:1 Walmart:2 Ebay:3 NewEgg:4
+# Product ID: 1-10
+# Write csv: [time, platformID, productID, price, rating, commentNum, name, link]
 
 import time
 from time import sleep
@@ -18,7 +18,7 @@ from lxml import html
 import re
 import csv
 
-# From Amazon links to names using 12 samples
+# From Amazon Links to Names using 10 samples
 def link_to_name(linklist): 
     global link_to_name_noexc
     link_to_name_noexc=False
@@ -37,7 +37,7 @@ def link_to_name(linklist):
 
 
 
-# Web scraping of four platforms, return [t, plat, id, price,rate,num,name,link]
+# Web scraping of four platforms, return [time, platformID, productID, price, rating, commentNum, name, link]
 def Amazon(linklist):
     plat1=[]
     i=0
@@ -298,7 +298,7 @@ def NewEgg(titlelist):
     return data
 
 
-# output to csv
+# Write to csv
 def output(linklist,titlelist):
     plat1=Amazon(linklist)
     plat2=Walmart(titlelist)
@@ -328,6 +328,4 @@ if __name__ == "__main__":
     if link_to_name_noexc:
         titlelist=link_to_name(linklist)
     data=output(linklist, titlelist)
-
-
 
