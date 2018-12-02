@@ -322,7 +322,7 @@ if __name__ == "__main__":
               'https://www.amazon.com/Flagship-Lenovo-Anti-glare-Quad-Core-Bluetooth/dp/B07DN2JG5T/ref=sr_1_4?ie=UTF8&qid=1543335827&sr=8-4&keywords=Lenovo+Laptop+IdeaPad+330',\
               'https://www.amazon.com/Premium-Dell-i7-8750H-Keyboard-Bluetooth/dp/B07GM4VHNP/ref=sr_1_1?ie=UTF8&qid=1541732861&sr=8-1&keywords=Dell+G5+Gaming+Laptop+15.6%22+Full+HD%2C+Intel+Core+i7-8750H',\
               'https://www.amazon.com/Panasonic-Microwave-NN-SN651B-Countertop-Technology/dp/B00FRD0PNC/ref=sr_1_4?s=home-garden&ie=UTF8&qid=1541723725&sr=1-4&keywords=panasonic+microwave+NN-SN651B&dpID=41-d0ePOmZL&preST=_SY300_QL70_&dpSrc=srch',\
-              'https://www.amazon.com/WHD-113FW1-Compact-Reversible-Refrigerator-Freezer/dp/B00MVVIMTW/ref=sr_1_1?ie=UTF8&qid=1543334614&sr=8-1&keywords=Midea+WHD-113FW1+3.1',\
+              'https://www.amazon.com/BLACK-DECKER-BCRK17W-Compact-Refrigerator/dp/B01DZQI7B4/ref=sr_1_1?s=home-garden&ie=UTF8&qid=1543772335&sr=1-1&keywords=BLACK%2BDECKER+BCRK17W+Compact+Refrigerator+Energy+Star+Single+Door+Mini+Fridge+with+Freezer%2C+1.7+Cubic+Ft.%2C+White',\
               'https://www.amazon.com/d/Space-Heaters-Accessories/Honeywell-HCE323V-Digital-Ceramic-Heater/B00KNBKB64/ref=sr_1_2_sspa?s=home-garden&ie=UTF8&qid=1543337061&sr=1-2-spons&keywords=Lasko+Ceramic+Tower+Heater+with+Digital+Display+%26+Remote+Control&psc=1']
     link_to_name_noexc=True
     if link_to_name_noexc:
