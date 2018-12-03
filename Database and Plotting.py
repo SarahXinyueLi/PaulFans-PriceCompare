@@ -438,10 +438,10 @@ database_df.to_csv('database.csv')
 
 # # Plot using database
 
-# In[335]:
+# In[368]:
 
 
-start_time = '2018-11-12'
+start_time = '2018-11-06'
 link = 'https://www.amazon.com/Samsung-Electronics-UN32M4500A-32-Inch-Smart/dp/B073JP6WK4/ref=sr_1_acs_bss_1_1?s=tv&ie=UTF8&qid=1543333023&sr=1-1-acs&keywords=samsung+tv'
 
 def graph_price(link, start_time):
@@ -472,7 +472,7 @@ def graph_price(link, start_time):
 graph_price(link, start_time)
 
 
-# In[336]:
+# In[369]:
 
 
 def graph_rating(link, start_time):
@@ -486,7 +486,7 @@ def graph_rating(link, start_time):
         select_df = database_df[database_df['time']>=start_time]
         try:
             # get productID based on link
-            productID = database_df['productID'][database_df['link'] == link][0]
+            productID = list(database_df['productID'][database_df['link'] == link])[0]
             select_df = select_df[['time','platformID','rating']][database_df['productID'] == productID]
             select_df = select_df.dropna(axis=0)
             # plot 
@@ -503,7 +503,7 @@ def graph_rating(link, start_time):
 graph_rating(link, start_time)
 
 
-# In[337]:
+# In[370]:
 
 
 def graph_comment(link, start_time):
@@ -517,7 +517,7 @@ def graph_comment(link, start_time):
         select_df = database_df[database_df['time']>=start_time]
         try:
             # get productID based on link
-            productID = database_df['productID'][database_df['link'] == link][0]
+            productID = list(database_df['productID'][database_df['link'] == link])[0]
             select_df = select_df[['time','platformID','commentNum']][database_df['productID'] == productID]
             select_df = select_df.dropna(axis=0)
             # plot 
@@ -536,7 +536,7 @@ graph_comment(link, start_time)
 
 # ## Draw Product Information Table
 
-# In[338]:
+# In[379]:
 
 
 def table(link):
@@ -546,7 +546,7 @@ def table(link):
         select_df = database_df[database_df['time']>=start_time]
         try:
             # get productID based on link
-            productID = database_df['productID'][database_df['link'] == link][0]
+            productID = list(database_df['productID'][database_df['link'] == link])[0]
             select_df = select_df[database_df['productID'] == productID]
             table_df = pd.DataFrame()
             platform_list = ['Amazon','Walmart','Ebay','Newegg']
@@ -559,9 +559,9 @@ def table(link):
                 except:
                     pass
                 productLink = list(select_df['link'][select_df['platformID'] == platformID])[0]
-                table_df = table_df.append(pd.Series([platformID,platformName,productName,productLink]),ignore_index=True)
-            table_df.columns = ['Platform ID','Platform Name','Product Name','Product Link']
-            string = table_df.to_string(sparsify=True,justify='match-parent')
+                table_df = table_df.append(pd.Series([platformName,productName,productLink]),ignore_index=True)
+            table_df.columns = ['Platform Name','Product Name','Product Link']
+            string = table_df.to_string(sparsify=True,justify='match-parent',index=False,col_space=10)
             return string
         
         except:
@@ -572,7 +572,7 @@ def table(link):
 string = table(link)
 
 
-# In[339]:
+# In[380]:
 
 
 print(string)
