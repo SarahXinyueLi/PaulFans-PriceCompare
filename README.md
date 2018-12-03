@@ -26,16 +26,9 @@ Installation Instructions:
 
 First, you need to clone the repo using the url we submitted.
 
-Then import Python packages, including:
+Then import Python packages, which are listed in requirements.txt
 
-import requests
-from bs4 import BeautifulSoup
-import csv
-import time
-from time import sleep
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
+
 
 
 Run Instructions:
